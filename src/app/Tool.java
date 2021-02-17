@@ -26,6 +26,6 @@ public abstract class Tool {
 	}
 	protected void drawLine(float x1, float y1, float x2, float y2) {
 		float ph = viewport.getPixelPerCm();
-		viewport.drawLineRounded(x1 * ph, y1 * ph, x2 * ph, y2 * ph);
+		viewport.getGraphicsContext2D().strokeLine(x1 * ph, y1 * ph, x2 * ph, y2 * ph);
 	}
 }

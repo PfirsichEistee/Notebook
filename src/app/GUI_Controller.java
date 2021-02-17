@@ -4,11 +4,15 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.Slider;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 
 public class GUI_Controller {
 	@FXML
@@ -18,12 +22,25 @@ public class GUI_Controller {
     @FXML
     private Pane mainPane;
     
+    @FXML
+    public ToggleButton toolPen, toolHighlighter, toolEraser, toolText, toolEquation, toolDiagram;
+    @FXML
+    public ColorPicker penColor;
+    @FXML
+    public Slider penStrength;
+    
     
     private Viewport viewport;
     
     
     public void initialize() {
-    	viewport = new Viewport(mainPane.getWidth(), mainPane.getHeight());
+    	// Gui
+    	penStrength.setMin(0.01);
+    	penStrength.setMax(0.2);
+    	penColor.setValue(Color.BLACK);
+    	
+    	// Viewport
+    	viewport = new Viewport(mainPane.getWidth(), mainPane.getHeight(), this);
     	
     	mainPane.getChildren().add(viewport);
     	

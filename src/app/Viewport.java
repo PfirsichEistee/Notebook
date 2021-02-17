@@ -2,14 +2,18 @@ package app;
 
 import java.util.ArrayList;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.StrokeLineCap;
 
 public class Viewport extends Canvas {
 	// ATTRIBUTES //
 	
 	// Editor Variables
+	private GUI_Controller gui;
 	private GraphicsContext gc;
 	
 	private float mouseX, mouseY;
@@ -20,6 +24,8 @@ public class Viewport extends Canvas {
 	
 	private Tool currentTool;
 	
+	private boolean showGrid;
+	
 	
 	// Current Data (Data is public, so Tools can modify it)
 	public ArrayList<Line> lineList;
@@ -28,10 +34,12 @@ public class Viewport extends Canvas {
 	
 	// CONSTRUCTOR //
 	
-	public Viewport(double pWidth, double pHeight) {
+	public Viewport(double pWidth, double pHeight, GUI_Controller pGui) {
 		super(pWidth, pHeight);
+		gui = pGui;
 		
 		gc = getGraphicsContext2D();
+		gc.setLineCap(StrokeLineCap.ROUND);
 		
 		mouseX = -20;
 		mouseY = -20;
@@ -41,6 +49,8 @@ public class Viewport extends Canvas {
 		positionY = -0.5f;
 		rectW = 0;
 		rectH = 0;
+		
+		showGrid = true;
 		
 		
 		
@@ -54,6 +64,10 @@ public class Viewport extends Canvas {
 		
 		// TESTING HERE
 		currentTool = new Tool_Pen();
+		
+		
+		// Lastly..
+		initGuiEvents();
 	}
 	
 	
@@ -74,6 +88,20 @@ public class Viewport extends Canvas {
 		gc.fillRect(-pixelPerCm / 4, -pixelPerCm / 4, getWidth() - (-positionX * pixelPerCm) + pixelPerCm, getHeight() - (-positionY * pixelPerCm) + pixelPerCm);
 		gc.setFill(Color.WHITE);
 		gc.fillRect(0, 0, getWidth() - (-positionX * pixelPerCm), getHeight() - (-positionY * pixelPerCm));
+		if (showGrid) {
+			gc.setStroke(new Color(0.2f, 0.2f, 1, 0.4f));
+			
+			// Top-left corner
+			float rootX = (positionX * pixelPerCm) - ((positionX * pixelPerCm) % pixelPerCm);
+			float rootY = (positionY * pixelPerCm) - ((positionY * pixelPerCm) % pixelPerCm);
+			
+			for (int x = 0; x <= (Math.floor(getWidth() / pixelPerCm) + 1); x++) {
+				gc.strokeLine(rootX + x * pixelPerCm, rootY, rootX + x * pixelPerCm, rootY + getHeight() + pixelPerCm);
+			}
+			for (int y = 0; y <= (Math.floor(getHeight() / pixelPerCm) + 1); y++) {
+				gc.strokeLine(rootX, rootY + y * pixelPerCm, rootX + getWidth() + pixelPerCm, rootY + y * pixelPerCm);
+			}
+		}
 		
 		// Draw Data
 		for (int i = 0; i < lineList.size(); i++) {
@@ -99,13 +127,14 @@ public class Viewport extends Canvas {
 		float pixelPerCm = getPixelPerCm();
 		
 		gc.setLineWidth(pixelPerCm * line.strength);
+		gc.setStroke(line.color);
 		
-		if (line.points.length > 2) {
+		if (line.points.length > 0) {
 			float prevX = line.points[0];
 			float prevY = line.points[1];
 			
 			for (int i = 0; i < line.points.length; i += 2) {
-				drawLineRounded(prevX * pixelPerCm, prevY * pixelPerCm, line.points[i] * pixelPerCm, line.points[i + 1] * pixelPerCm);
+				gc.strokeLine(prevX * pixelPerCm, prevY * pixelPerCm, line.points[i] * pixelPerCm, line.points[i + 1] * pixelPerCm);
 				
 				prevX = line.points[i];
 				prevY = line.points[i + 1];
@@ -189,9 +218,25 @@ public class Viewport extends Canvas {
 		rectH = ph;
 	}
 	
-	// Custom Drawing
-	public void drawLineRounded(float x1, float y1, float x2, float y2) {
-		gc.strokeLine(x1, y1, x2, y2);
+	// Gui Events
+	public void initGuiEvents() {
+		gui.penStrength.valueProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				if (currentTool != null && currentTool.getClass().isAssignableFrom(Tool_Pen.class)) {
+					((Tool_Pen)currentTool).setStrength((float)gui.penStrength.getValue());
+				}
+			}
+		});
+		
+		gui.penColor.valueProperty().addListener(new ChangeListener<Color>() {
+			@Override
+			public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+				if (currentTool != null && currentTool.getClass().isAssignableFrom(Tool_Pen.class)) {
+					((Tool_Pen)currentTool).setColor(gui.penColor.getValue());
+				}
+			}
+		});
 	}
 }
 

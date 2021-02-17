@@ -2,9 +2,12 @@ package app;
 
 import java.util.ArrayList;
 
+import javafx.scene.paint.Color;
+
 public class Tool_Pen extends Tool {
 	private ArrayList<Float> line;
 	private float strength;
+	private Color color;
 	
 	private float lastDragX, lastDragY;
 	
@@ -12,6 +15,7 @@ public class Tool_Pen extends Tool {
 	public Tool_Pen() {
 		line = new ArrayList<Float>();
 		strength = 0.05f;
+		color = Color.BLACK;
 		
 		lastDragX = -999;
 		lastDragY = -999;
@@ -56,7 +60,7 @@ public class Tool_Pen extends Tool {
 				floatArray[i] = line.get(i);
 			}
 			
-			Line newLine = new Line(strength, 0, floatArray);
+			Line newLine = new Line(strength, color, floatArray);
 			
 			viewport.lineList.add(newLine);
 			
@@ -97,11 +101,14 @@ public class Tool_Pen extends Tool {
 	
 	@Override
 	public void draw() {
-		if (line.size() > 2) {
+		if (line.size() > 0) {
+			viewport.getGraphicsContext2D().setStroke(color);
+			viewport.getGraphicsContext2D().setLineWidth(viewport.getPixelPerCm() * strength);
+			
 			float prevX = line.get(0);
 			float prevY = line.get(1);
 			
-			for (int i = 2; i < line.size(); i += 2) {
+			for (int i = 0; i < line.size(); i += 2) {
 				drawLine(prevX, prevY, line.get(i), line.get(i + 1));
 				
 				prevX = line.get(i);
@@ -113,5 +120,8 @@ public class Tool_Pen extends Tool {
 	
 	public void setStrength(float pStrength) {
 		strength = pStrength;
+	}
+	public void setColor(Color pColor) {
+		color = pColor;
 	}
 }

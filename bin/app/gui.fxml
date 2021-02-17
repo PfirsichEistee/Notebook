@@ -6,7 +6,6 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
 <BorderPane fx:id="borderPaneA" minHeight="600.0" minWidth="800.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.GUI_Controller">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
@@ -31,16 +30,46 @@
    </top>
    <center>
       <BorderPane fx:id="borderPaneB" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-         <top>
-            <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-              <items>
-                <Button mnemonicParsing="false" text="Button" />
-              </items>
-            </ToolBar>
-         </top>
          <center>
             <Pane fx:id="mainPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
          </center>
+         <top>
+            <TabPane prefHeight="66.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+              <tabs>
+                <Tab text="Home">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="198.0" prefWidth="800.0">
+                           <children>
+                              <ToolBar layoutY="-1.0" prefHeight="40.0" prefWidth="800.0">
+                                <items>
+                                    <ToggleButton fx:id="toolPen" mnemonicParsing="false" text="Pen" />
+                                    <ToggleButton fx:id="toolHighlighter" mnemonicParsing="false" text="Highlighter" />
+                                    <ToggleButton fx:id="toolEraser" mnemonicParsing="false" text="Eraser" />
+                                    <ToggleButton fx:id="toolText" mnemonicParsing="false" text="Text" />
+                                    <ToggleButton fx:id="toolEquation" mnemonicParsing="false" text="Equation" />
+                                    <ToggleButton fx:id="toolDiagram" mnemonicParsing="false" text="Diagram" />
+                                    <Separator orientation="VERTICAL" prefHeight="0.0" prefWidth="30.0" />
+                                    <ColorPicker fx:id="penColor" />
+                                    <Slider fx:id="penStrength" prefHeight="14.0" prefWidth="117.0" />
+                                </items>
+                              </ToolBar>
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+                <Tab text="Text">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  </content>
+                </Tab>
+                  <Tab text="Diagram">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                    </content>
+                  </Tab>
+              </tabs>
+            </TabPane>
+         </top>
       </BorderPane>
    </center>
 </BorderPane>
