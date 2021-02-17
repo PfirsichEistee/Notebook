@@ -4,8 +4,11 @@ import java.util.ArrayList;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeLineCap;
 
@@ -55,17 +58,14 @@ public class Viewport extends Canvas {
 		
 		
 		// Prepare other classes
-		Tool.viewport = this;
+		Tool.setViewport(this);
+		//Tool.viewport = this;
 		
 		
 		// Prepare Data
 		lineList = new ArrayList<Line>();
 		
-		
-		// TESTING HERE
-		currentTool = new Tool_Pen();
-		
-		
+
 		// Lastly..
 		initGuiEvents();
 	}
@@ -175,6 +175,14 @@ public class Viewport extends Canvas {
 		mouseX = px;
 		mouseY = py;
 	}
+	public void onMouseMoved(float px, float py) {
+		mouseX = px;
+		mouseY = py;
+		
+		if (currentTool != null) {
+			currentTool.moveMouse(getMouseViewX(), getMouseViewY());
+		}
+	}
 	public void onMouseScrolled(int dir) {
 		float phMouseX = getMouseViewX();
 		float phMouseY = getMouseViewY();
@@ -206,11 +214,13 @@ public class Viewport extends Canvas {
 	public float getRectH() {
 		return rectH;
 	}
-	
-	public void setMouse(float px, float py) {
-		mouseX = px;
-		mouseY = py;
+	public float getPenStrength() {
+		return (float)gui.penStrength.getValue();
 	}
+	public Color getPenColor() {
+		return gui.penColor.getValue();
+	}
+	
 	public void setRectW(float pw) {
 		rectW = pw;
 	}
@@ -237,6 +247,82 @@ public class Viewport extends Canvas {
 				}
 			}
 		});
+		
+		EventHandler<ActionEvent> toolEvent = new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				toolSwitched(event);
+			}
+		};
+		
+		gui.toolPen.setOnAction(toolEvent);
+		gui.toolHighlighter.setOnAction(toolEvent);
+		gui.toolEraser.setOnAction(toolEvent);
+		gui.toolText.setOnAction(toolEvent);
+		gui.toolEquation.setOnAction(toolEvent);
+		gui.toolDiagram.setOnAction(toolEvent);
+	}
+	
+	
+	// Else
+	private void toolSwitched(ActionEvent event) {
+		gui.toolPen.setSelected(false);
+		gui.toolHighlighter.setSelected(false);
+		gui.toolEraser.setSelected(false);
+		gui.toolText.setSelected(false);
+		gui.toolEquation.setSelected(false);
+		gui.toolDiagram.setSelected(false);
+		((ToggleButton)event.getSource()).setSelected(true);
+		
+		if (currentTool != null) {
+			currentTool.quitTool();
+			currentTool = null;
+		}
+		
+		if (event.getSource() == gui.toolPen) {
+			currentTool = new Tool_Pen();
+			((Tool_Pen)currentTool).setStrength((float)gui.penStrength.getValue());
+			((Tool_Pen)currentTool).setColor(gui.penColor.getValue());
+		} else if (event.getSource() == gui.toolHighlighter) {
+			
+		} else if (event.getSource() == gui.toolEraser) {
+			currentTool = new Tool_Eraser();
+		} else if (event.getSource() == gui.toolText) {
+			
+		} else if (event.getSource() == gui.toolEquation) {
+			
+		} else if (event.getSource() == gui.toolDiagram) {
+			
+		}
+		
+		draw();
+	}
+	
+	public void updateRectSize() {
+		float furthestX = 0;
+		float furthestY = 0;
+		
+		for (int i = 0; i < lineList.size(); i++) {
+			for (int k = 0; k < lineList.get(i).points.length; k += 2) {
+				float numX = lineList.get(i).points[k];
+				float numY = lineList.get(i).points[k + 1];
+				
+				if (numX > furthestX) {
+					furthestX = numX;
+				}
+				if (numY > furthestY) {
+					furthestY = numY;
+				}
+			}
+		}
+		
+		rectW = furthestX;
+		rectH = furthestY;
+	}
+	
+	public void updatePosition() {
+		positionX = CMath.clamp(positionX, -0.5f, rectW - 0.5f);
+		positionY = CMath.clamp(positionY, -0.5f, rectH - 0.5f);
 	}
 }
 

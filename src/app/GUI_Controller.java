@@ -37,6 +37,7 @@ public class GUI_Controller {
     	// Gui
     	penStrength.setMin(0.01);
     	penStrength.setMax(0.2);
+    	penStrength.setValue(0.1);
     	penColor.setValue(Color.BLACK);
     	
     	// Viewport
@@ -64,7 +65,7 @@ public class GUI_Controller {
     	mainPane.setOnMouseMoved(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				viewport.setMouse((float)event.getX(), (float)event.getY());
+				viewport.onMouseMoved((float)event.getX(), (float)event.getY());
 			}
     	});
     	

@@ -45,6 +45,10 @@ public class Tool_Pen extends Tool {
 		}
 	}
 	@Override
+	public void moveMouse(float mouseX, float mouseY) {
+		
+	}
+	@Override
 	public void pressMouse(int button, float mouseX, float mouseY) {
 		if (button == 0) {
 			dragMouse(button, mouseX, mouseY);

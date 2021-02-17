@@ -1,13 +1,16 @@
 package app;
 
+import javafx.scene.canvas.GraphicsContext;
 
 public abstract class Tool {
-	public static Viewport viewport;
+	protected static Viewport viewport;
+	protected static GraphicsContext gc;
 	
 	
 	// All coordinates in cm
 	public abstract void clickMouse(int button, float mouseX, float mouseY);
 	public abstract void dragMouse(int button, float mouseX, float mouseY);
+	public abstract void moveMouse(float mouseX, float mouseY);
 	public abstract void pressMouse(int button, float mouseX, float mouseY);
 	public abstract void releaseMouse(int button, float mouseX, float mouseY);
 	public abstract void startTool(); // Start using this tool
@@ -21,11 +24,19 @@ public abstract class Tool {
 	protected void drawRect() {
 		
 	}
-	protected void drawCircle() {
-		
+	protected void drawCircle(float x, float y, float r) {
+		float ph = viewport.getPixelPerCm();
+		gc.fillOval(x * ph - r * ph, y * ph - r * ph, r * ph * 2, r * ph * 2);
+		gc.strokeOval(x * ph - r * ph, y * ph - r * ph, r * ph * 2, r * ph * 2);
 	}
 	protected void drawLine(float x1, float y1, float x2, float y2) {
 		float ph = viewport.getPixelPerCm();
-		viewport.getGraphicsContext2D().strokeLine(x1 * ph, y1 * ph, x2 * ph, y2 * ph);
+		gc.strokeLine(x1 * ph, y1 * ph, x2 * ph, y2 * ph);
+	}
+	
+	
+	public static void setViewport(Viewport pViewport) {
+		viewport = pViewport;
+		gc = viewport.getGraphicsContext2D();
 	}
 }
