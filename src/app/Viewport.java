@@ -31,8 +31,8 @@ public class Viewport extends Canvas {
 	
 	
 	// Current Data (Data is public, so Tools can modify it)
+	public ArrayList<TextBox> textboxList;
 	public ArrayList<Line> lineList;
-	public ArrayList<String> textboxList;
 	
 	
 	// CONSTRUCTOR //
@@ -63,11 +63,16 @@ public class Viewport extends Canvas {
 		
 		
 		// Prepare Data
+		textboxList = new ArrayList<TextBox>();
 		lineList = new ArrayList<Line>();
 		
 
 		// Lastly..
 		initGuiEvents();
+		
+		
+		// TESTING
+		textboxList.add(new TextBox("This is some sort [/f\\]of test[/n\\] haha\nIs\nA\nTest", 1, 1, 10, 0.5f));
 	}
 	
 	
@@ -88,6 +93,8 @@ public class Viewport extends Canvas {
 		gc.fillRect(-pixelPerCm / 4, -pixelPerCm / 4, getWidth() - (-positionX * pixelPerCm) + pixelPerCm, getHeight() - (-positionY * pixelPerCm) + pixelPerCm);
 		gc.setFill(Color.WHITE);
 		gc.fillRect(0, 0, getWidth() - (-positionX * pixelPerCm), getHeight() - (-positionY * pixelPerCm));
+		
+		// Draw Grid
 		if (showGrid) {
 			gc.setStroke(new Color(0.2f, 0.2f, 1, 0.4f));
 			
@@ -104,6 +111,9 @@ public class Viewport extends Canvas {
 		}
 		
 		// Draw Data
+		for (int i = 0; i < textboxList.size(); i++) {
+			textboxList.get(i).draw(gc, pixelPerCm);
+		}
 		for (int i = 0; i < lineList.size(); i++) {
 			drawLine(lineList.get(i));
 		}
@@ -205,6 +215,12 @@ public class Viewport extends Canvas {
 	public float getMouseViewY() {
 		return (mouseY / getPixelPerCm()) + positionY;
 	}
+	public float getMouseX() {
+		return mouseX;
+	}
+	public float getMouseY() {
+		return mouseY;
+	}
 	public float getPixelPerCm() {
 		return (float)getWidth() / zoom;
 	}
@@ -288,7 +304,7 @@ public class Viewport extends Canvas {
 		} else if (event.getSource() == gui.toolEraser) {
 			currentTool = new Tool_Eraser();
 		} else if (event.getSource() == gui.toolText) {
-			
+			currentTool = new Tool_Text();
 		} else if (event.getSource() == gui.toolEquation) {
 			
 		} else if (event.getSource() == gui.toolDiagram) {

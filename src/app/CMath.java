@@ -16,4 +16,11 @@ public final class CMath {
 		
 		return (float)Math.sqrt(x1 * x1 + y1 * y1);
 	}
+	
+	public static boolean isPointInRect(float px, float py, float rx, float ry, float rw, float rh) {
+		if (px >= rx && px <= (rx + rw) && py >= ry && py <= (ry + rh)) {
+			return true;
+		}
+		return false;
+	}
 }

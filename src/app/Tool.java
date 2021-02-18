@@ -21,8 +21,11 @@ public abstract class Tool {
 		// Use methods below to draw something (coordinates in cm)
 	}
 	
-	protected void drawRect() {
+	protected void drawRect(float x, float y, float w, float h) {
+		float ph = viewport.getPixelPerCm();
 		
+		gc.fillRect(x * ph, y * ph, w * ph, h * ph);
+		gc.strokeRect(x * ph, y * ph, w * ph, h * ph);
 	}
 	protected void drawCircle(float x, float y, float r) {
 		float ph = viewport.getPixelPerCm();
