@@ -82,6 +82,12 @@ public class GUI_Controller {
 				viewport.onMouseReleased(getMouseButtonID(event), (float)event.getX(), (float)event.getY());
 			}
     	});
+    	mainPane.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				viewport.onMouseClicked(getMouseButtonID(event), (float)event.getX(), (float)event.getY());
+			}
+    	});
     	
     	// Mouse Drag
     	mainPane.setOnMouseDragged(new EventHandler<MouseEvent>() {

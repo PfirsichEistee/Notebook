@@ -23,4 +23,85 @@ public final class CMath {
 		}
 		return false;
 	}
+	
+	public static String getStringRow(String str, int row) {
+		int startIndex = 0;
+		for (int i = 1; i <= row; i++) {
+			int endIndex = str.indexOf("\n", startIndex);
+			
+			if (i == row) {
+				if (endIndex != -1) {
+					return str.substring(startIndex, endIndex);
+				} else {
+					return str.substring(startIndex);
+				}
+			}
+			
+			if (endIndex == -1) {
+				return null;
+			}
+			
+			startIndex = endIndex + 1;
+		}
+		
+		return null;
+	}
+	
+	public static Integer getStringRowStart(String str, int row) {
+		int startIndex = 0;
+		for (int i = 1; i <= row; i++) {
+			int endIndex = str.indexOf("\n", startIndex);
+			
+			if (i == row) {
+				return startIndex;
+			}
+			
+			if (endIndex == -1) {
+				return null;
+			}
+			
+			startIndex = endIndex + 1;
+		}
+		
+		return null;
+	}
+	
+	public static Integer getStringRowEnd(String str, int row) {
+		int startIndex = 0;
+		for (int i = 1; i <= row; i++) {
+			int endIndex = str.indexOf("\n", startIndex);
+			
+			if (i == row) {
+				if (endIndex != -1) {
+					return endIndex;
+				} else {
+					return (str.length() - 1);
+				}
+			}
+			
+			if (endIndex == -1) {
+				return null;
+			}
+			
+			startIndex = endIndex + 1;
+		}
+		
+		return null;
+	}
+	
+	public static int getStringRowCount(String str) {
+		int count = 1;
+		Integer index = null;
+		
+		do {
+			index = str.indexOf("\n", index);
+			
+			if (index != null) {
+				index++;
+				count++;
+			}
+		} while (index != null);
+		
+		return count;
+	}
 }

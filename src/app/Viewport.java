@@ -154,7 +154,9 @@ public class Viewport extends Canvas {
 	
 	// Events
 	public void onMouseClicked(int button, float px, float py) {
-		
+		if (currentTool != null) {
+			currentTool.clickMouse(button, getMouseViewX(), getMouseViewY());
+		}
 	}
 	public void onMousePressed(int button, float px, float py) {
 		if (currentTool != null) {
@@ -329,6 +331,17 @@ public class Viewport extends Canvas {
 				if (numY > furthestY) {
 					furthestY = numY;
 				}
+			}
+		}
+		
+		for (int i = 0; i < textboxList.size(); i++) {
+			TextBox tb = textboxList.get(i);
+			
+			if ((tb.x + tb.getTextWidth()) > furthestX) {
+				furthestX = (tb.x + tb.getTextWidth());
+			}
+			if ((tb.y + tb.getTextHeight()) > furthestY) {
+				furthestY = (tb.y + tb.getTextHeight());
 			}
 		}
 		
