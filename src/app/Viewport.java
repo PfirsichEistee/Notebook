@@ -199,7 +199,7 @@ public class Viewport extends Canvas {
 		float phMouseX = getMouseViewX();
 		float phMouseY = getMouseViewY();
 		
-		zoom = CMath.clamp(zoom - dir * 3, 3, 100);
+		zoom = CMath.clamp(zoom - dir * 2, 5, 100);
 		
 		float deltaX = phMouseX - getMouseViewX();
 		float deltaY = phMouseY - getMouseViewY();

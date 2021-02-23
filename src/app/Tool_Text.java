@@ -79,6 +79,11 @@ public class Tool_Text extends Tool {
 				return;
 			}
 			
+			if (selectedTextBox != null && selectedTextBox != hoveringTextBox) {
+				selChar[0] = null;
+				selChar[1] = null;
+			}
+			
 			selectedTextBox = hoveringTextBox;
 			
 			if (selectedTextBox != null) {
@@ -93,6 +98,7 @@ public class Tool_Text extends Tool {
 					if (button == 0) {
 						updateSelectedChar(0, mouseX, mouseY);
 						selChar[1] = null;
+						selCharRight[1] = selCharRight[0];
 						
 						viewport.draw();						
 					}
@@ -113,7 +119,7 @@ public class Tool_Text extends Tool {
 			if (selectedTextBox != null && button == 0 && CMath.isPointInRect(mouseX, mouseY, selectedTextBox.x, selectedTextBox.y, selectedTextBox.getTextWidth() + 0.5f, selectedTextBox.getTextHeight() + 0.5f)) {
 				updateSelectedChar(1, mouseX, mouseY);
 				
-				if (selChar[1].equals(selChar[0])) {
+				if (selChar[0] != null && selChar[1] != null && selChar[1].equals(selChar[0])) {
 					selChar[1] = null;
 				}
 				
@@ -153,94 +159,78 @@ public class Tool_Text extends Tool {
 		// Selection
 		if (selectedTextBox != null) {
 			String rawText = selectedTextBox.getUnpatternedString();
+			int rowCount = CMath.getStringRowCount(rawText);
+			
+			
+			float[] xSelPos = new float[2];
+			float[] ySelPos = new float[2];
+			float[] selSize = new float[2];
+			
 			
 			gc.setFill(new Color(1, 0.4, 0, 0.7));
 			gc.setStroke(new Color(0, 0, 0, 0));
 			
 			
-			Float[] selPosX = new Float[2];
-			Float[] selPosY = new Float[2];
-			Float[] selSize = new Float[2];
-			
-			for (int i = 0; i < 2; i++) {
-				if (selChar[i] != null) {
-					int cRow = 1;
-					Integer startRow = null;
-					do {
-						startRow = CMath.getStringRowStart(rawText, cRow);
-						Integer endRow = CMath.getStringRowEnd(rawText, cRow);
+			for (int selIndex = 0; selIndex < 2; selIndex++) {
+				if (selChar[selIndex] != null) {
+					// find positions
+					for (int i = 1; i <= rowCount; i++) {
+						int rowStart = CMath.getStringRowStart(rawText, i);
+						int rowEnd = CMath.getStringRowEnd(rawText, i);
 						
-						if (startRow != null && startRow <= selChar[i] && endRow >= selChar[i]) {
-							// Character is in row "cRow"
-							String ph = rawText.substring(startRow, selChar[i]);
-							
-							selPosX[i] = selectedTextBox.getStringWidth(ph);
-							selPosY[i] = (cRow - 1) * selectedTextBox.fontHeight;
-							selSize[i] = selectedTextBox.getStringWidth(String.valueOf(rawText.charAt(selChar[i]))); // single char width
-							
-							//drawRect(selectedTextBox.x + phWidth, selectedTextBox.y + (cRow - 1) * selectedTextBox.fontHeight, charWidth, selectedTextBox.fontHeight);
-							
-							
-							break;
-						} else {
-							// Not in this row
-							cRow++;
+						if (selChar[selIndex] >= rowStart && selChar[selIndex] <= rowEnd) {
+							xSelPos[selIndex] = selectedTextBox.getStringWidth(rawText.substring(rowStart, selChar[selIndex] + 1));
+							ySelPos[selIndex] = (i - 1) * selectedTextBox.fontHeight;
+							selSize[selIndex] = selectedTextBox.getStringWidth(String.valueOf(rawText.charAt(selChar[selIndex])));
 						}
-					} while (startRow != null);
+					}
 				}
 			}
 			
-			if (selChar[1] != null && selChar[0] == null) {
-				selPosX[0] = selPosX[1];
-				selPosY[0] = selPosY[1];
-				selSize[0] = selSize[1];
+			// Draw Selection
+			if (selChar[0] != null || selChar[1] != null) {
+				if (selChar[0] == null) {
+					selChar[0] = selChar[1];
+					xSelPos[0] = xSelPos[1];
+					ySelPos[0] = ySelPos[1];
+					selSize[0] = selSize[1];
+				} else if (selChar[1] == null) {
+					selChar[1] = selChar[0];
+					xSelPos[1] = xSelPos[0];
+					ySelPos[1] = ySelPos[0];
+					selSize[1] = selSize[0];
+				}
 				
-				selPosX[1] = null;
-				selPosY[1] = null;
-				selSize[1] = null;
-			}
-			
-			if (selChar[0] != null && selChar[1] != null && selChar[1] < selChar[0]) {
-				float ph1 = selPosX[0];
-				float ph2 = selPosY[0];
-				float ph3 = selSize[0];
 				
-				selPosX[0] = selPosX[1];
-				selPosY[0] = selPosY[1];
-				selSize[0] = selSize[1];
+				int selMode = getSelectionMode();
 				
-				selPosX[1] = ph1;
-				selPosY[1] = ph2;
-				selSize[1] = ph3;
-			}
-			
-			if (selPosX[0] != null && selPosX[1] != null && selPosX[0].equals(selPosX[1]) && selPosY[0].equals(selPosY[1])) {
-				selPosX[1] = null;
-				selPosY[1] = null;
-				selSize[1] = null;
-			}
-			
-			
-			if (selPosX[0] != null) {
-				if (selPosX[1] != null) {
-					// Multi-char-selection
-					if (selPosY[0].equals(selPosY[1])) {
-						// Same row
-						drawRect(selPosX[0] + selectedTextBox.x, selPosY[0] + selectedTextBox.y, selPosX[1] - selPosX[0] + selSize[1], selectedTextBox.fontHeight);
-					} else {
-						drawRect(selPosX[0] + selectedTextBox.x, selPosY[0] + selectedTextBox.y, selectedTextBox.getTextWidth() - selPosX[0], selectedTextBox.fontHeight);
-						
-						drawRect(selectedTextBox.x, selPosY[1] + selectedTextBox.y, selPosX[1] + selSize[1], selectedTextBox.fontHeight);
-						
-						drawRect(selectedTextBox.x, selPosY[0] + selectedTextBox.y + selectedTextBox.fontHeight, selectedTextBox.getTextWidth(), selPosY[1] - selPosY[0] - selectedTextBox.fontHeight);
+				if (selMode == 0) {
+					// Normal Editing (single line)
+					drawRect(selectedTextBox.x + xSelPos[0] - (!selCharRight[0] ? selSize[0] : 0), selectedTextBox.y + ySelPos[0], 0.05f, selectedTextBox.fontHeight);
+				} else if (selMode == 1) {
+					// Single Row Selection
+					float phx1 = selectedTextBox.x + xSelPos[0] - (!selCharRight[0] ? selSize[0] : 0);
+					float phx2 = selectedTextBox.x + xSelPos[1] - (!selCharRight[1] ? selSize[1] : 0);
+					
+					if (phx2 < phx1) {
+						float phx3 = phx1;
+						phx1 = phx2;
+						phx2 = phx3;
 					}
+					
+					drawRect(phx1, selectedTextBox.y + ySelPos[0], phx2 - phx1, selectedTextBox.fontHeight);
 				} else {
-					// Single-char-selection
-					if (selCharRight[0] && selChar[0] != null || selCharRight[1] && selChar[1] != null) {
-						drawRect(selPosX[0] + selectedTextBox.x + selSize[0], selPosY[0] + selectedTextBox.y, 0.1f, selectedTextBox.fontHeight);
-					} else {
-						drawRect(selPosX[0] + selectedTextBox.x, selPosY[0] + selectedTextBox.y, selSize[0], selectedTextBox.fontHeight);
-					}
+					// Multiple Row Selection
+					int lower = (selChar[0] < selChar[1] ? 0 : 1);
+					int higher = 1 - lower;
+					
+					float phx1 = xSelPos[lower] - (!selCharRight[lower] ? selSize[lower] : 0);
+					float phx2 = xSelPos[higher] - (!selCharRight[higher] ? selSize[higher] : 0);
+					
+					drawRect(selectedTextBox.x + phx1, selectedTextBox.y + ySelPos[lower], selectedTextBox.getTextWidth() - phx1, selectedTextBox.fontHeight);
+					drawRect(selectedTextBox.x, selectedTextBox.y + ySelPos[higher], phx2, selectedTextBox.fontHeight);
+					
+					drawRect(selectedTextBox.x, selectedTextBox.y + ySelPos[lower] + selectedTextBox.fontHeight, selectedTextBox.getTextWidth(), ySelPos[higher] - ySelPos[lower] - selectedTextBox.fontHeight);
 				}
 			}
 		}
@@ -264,14 +254,15 @@ public class Tool_Text extends Tool {
 					// Its this row
 					String row = CMath.getStringRow(rawText, selRow);
 					
+					float mx = CMath.clamp(mouseX - selectedTextBox.x, 0, selectedTextBox.getStringWidth(row));
 					for (int i = (row.length() - 1); i >= 0; i--) {
-						if ((mouseX - selectedTextBox.x) >= selectedTextBox.getStringWidth(row.substring(0, i))) {
-							selChar[index] = rowStart + i;
+						float subWidth = selectedTextBox.getStringWidth(row.substring(0, i));
+						if (mx >= subWidth) {
+							mx -= subWidth;
+							subWidth = selectedTextBox.getStringWidth(String.valueOf(row.charAt(i)));
 							
-							selCharRight[index] = false;
-							if (i == (row.length() - 1) && (mouseX - selectedTextBox.x) >= selectedTextBox.getStringWidth(row.substring(0, i + 1))) {
-								selCharRight[index] = true;
-							}
+							selCharRight[index] = (mx > (subWidth / 2) ? true : false);
+							selChar[index] = rowStart + i;
 							
 							break;
 						}
@@ -284,6 +275,37 @@ public class Tool_Text extends Tool {
 				}
 			} while (selRow > 1);
 			
+		}
+	}
+	
+	private int getSelectionMode() {
+		int[] selRow = new int[2];
+		
+		String rawTxt = selectedTextBox.getUnpatternedString();
+		int rows = CMath.getStringRowCount(rawTxt);
+		
+		for (int i = 0; i < 2; i++) {
+			for (int r = 1; r <= rows; r++) {
+				int start = CMath.getStringRowStart(rawTxt, r);
+				int end = CMath.getStringRowEnd(rawTxt, r);
+				
+				if (selChar[i] >= start && selChar[i] <= end) {
+					selRow[i] = r;
+					break;
+				}
+			}
+		}
+		
+		if (selRow[0] == selRow[1]) {
+			if (selChar[0] == selChar[1] && selCharRight[0] == selCharRight[1]
+					|| selChar[1] == (selChar[0] + 1) && selCharRight[0] && !selCharRight[1]
+					|| selChar[0] == (selChar[1] + 1) && selCharRight[1] && !selCharRight[0]) {
+				return 0;
+			} else {
+				return 1;
+			}
+		} else {
+			return 2;
 		}
 	}
 }

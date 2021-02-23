@@ -91,16 +91,15 @@ public final class CMath {
 	
 	public static int getStringRowCount(String str) {
 		int count = 1;
-		Integer index = null;
+		int index = -1;
 		
 		do {
-			index = str.indexOf("\n", index);
+			index = str.indexOf("\n", index + 1);
 			
-			if (index != null) {
-				index++;
+			if (index != -1) {
 				count++;
 			}
-		} while (index != null);
+		} while (index != -1);
 		
 		return count;
 	}
