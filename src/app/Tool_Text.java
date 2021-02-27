@@ -1,5 +1,9 @@
 package app;
 
+import javafx.event.EventHandler;
+import javafx.scene.Parent;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 public class Tool_Text extends Tool {
@@ -12,7 +16,7 @@ public class Tool_Text extends Tool {
 	private boolean[] selCharRight;
 	
 	
-	public Tool_Text() {
+	public Tool_Text(Parent root) {
 		isDragging = false;
 		dragX = 0;
 		dragY = 0;
@@ -21,6 +25,13 @@ public class Tool_Text extends Tool {
 		selCharRight = new boolean[2];
 		selCharRight[0] = false;
 		selCharRight[1] = false;
+		
+		root.setOnKeyTyped(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				typeKey(event);
+			}
+		});
 	}
 	
 	
@@ -235,6 +246,27 @@ public class Tool_Text extends Tool {
 			}
 		}
 	}
+	
+	private void typeKey(KeyEvent event) {
+		if (selectedTextBox != null && (selChar[0] != null || selChar[1] != null)) {
+			int index = selectedTextBox.getStringRealIndex(selChar[0]);
+			
+			String txt = selectedTextBox.text;
+			
+			if (selCharRight[0]) {
+				txt = txt.substring(0, index + 1) + event.getCharacter() + txt.substring(index + 1);
+			} else {
+				txt = txt.substring(0, index) + event.getCharacter() + txt.substring(index);
+			}
+			
+			selectedTextBox.text = txt;
+			selChar[0]++;
+			selChar[1] = null;
+			
+			viewport.draw();
+		}
+	}
+	
 	
 	private void updateSelectedChar(int index, float mouseX, float mouseY) {
 		selChar[index] = null;

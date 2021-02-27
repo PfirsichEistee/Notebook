@@ -94,22 +94,8 @@ public class TextBox {
 	}
 	
 	
-	private String getStringWithoutPattern(String str) {
-		int phIndex = 0;
-		while (phIndex != -1) {
-			phIndex = str.indexOf("[/");
-			
-			if (phIndex != -1 && str.indexOf("\\]") != -1) {
-				str = str.substring(0, phIndex) + str.substring(str.indexOf("\\]") + 2);
-			}
-		}
-		
-		return str;
-	}
-	
-	
 	public float getTextWidth() {
-		Text txt = new Text(getStringWithoutPattern(text));
+		Text txt = new Text(getUnpatternedString(text));
 		txt.setFont(Font.font(fontHeight));
 		
 		return (float)txt.getLayoutBounds().getWidth(); // width in cm!
@@ -131,15 +117,15 @@ public class TextBox {
 	public float getStringWidth(String str) {
 		// ..in cm
 		
-		Text txt = new Text(getStringWithoutPattern(str));
+		Text txt = new Text(getUnpatternedString(str));
 		txt.setFont(Font.font(fontHeight));
 		
 		return (float)txt.getLayoutBounds().getWidth();
-	} 
+	}
 	public int getStringRealIndex(String strWithPattern, int strIndex) {
 		// strIndex is the index of getStringWithoutPattern(strWithPattern)
 		
-		String str = getStringWithoutPattern(strWithPattern);
+		String str = getUnpatternedString(strWithPattern);
 		
 		int offset = 0;
 		
@@ -150,6 +136,9 @@ public class TextBox {
 		}
 		
 		return (strIndex + offset);
+	}
+	public int getStringRealIndex(int strIndex) {
+		return getStringRealIndex(text, strIndex);
 	}
 	public String getUnpatternedString(String ph) {
 		int phIndex = 0;

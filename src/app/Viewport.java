@@ -306,7 +306,7 @@ public class Viewport extends Canvas {
 		} else if (event.getSource() == gui.toolEraser) {
 			currentTool = new Tool_Eraser();
 		} else if (event.getSource() == gui.toolText) {
-			currentTool = new Tool_Text();
+			currentTool = new Tool_Text(gui.getRoot());
 		} else if (event.getSource() == gui.toolEquation) {
 			
 		} else if (event.getSource() == gui.toolDiagram) {

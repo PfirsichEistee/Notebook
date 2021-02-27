@@ -4,6 +4,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
@@ -30,6 +31,7 @@ public class GUI_Controller {
     public Slider penStrength;
     
     
+    private Parent root;
     private Viewport viewport;
     
     
@@ -121,6 +123,13 @@ public class GUI_Controller {
     		return 1;
     	}
     	return 2;
+    }
+    
+    public void setRoot(Parent pRoot) {
+    	root = pRoot;
+    }
+    public Parent getRoot() {
+    	return root;
     }
 }
 

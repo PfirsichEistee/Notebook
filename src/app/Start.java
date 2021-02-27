@@ -15,6 +15,7 @@ public class Start extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("gui.fxml"));
 		Parent root = (Parent)loader.load();
+		((GUI_Controller)loader.getController()).setRoot(root);
 		primaryStage.setScene(new Scene(root));
 		primaryStage.setTitle("Notebook");
 		
