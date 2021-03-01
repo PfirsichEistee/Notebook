@@ -2,6 +2,7 @@ package app;
 
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -26,7 +27,7 @@ public class Tool_Text extends Tool {
 		selCharRight[0] = false;
 		selCharRight[1] = false;
 		
-		root.setOnKeyTyped(new EventHandler<KeyEvent>() {
+		root.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				typeKey(event);
@@ -67,7 +68,7 @@ public class Tool_Text extends Tool {
 		for (int i = 0; i < viewport.textboxList.size(); i++) {
 			TextBox tb = viewport.textboxList.get(i);
 			
-			if (CMath.isPointInRect(mouseX, mouseY, tb.x - 0.25f, tb.y - 0.75f, tb.getTextWidth() + 0.5f, tb.getTextHeight() + 1.25f)) {
+			if (CMath.isPointInRect(mouseX, mouseY, tb.x - 0.25f, tb.y - 0.75f, tb.getTextWidth() + 0.5f, tb.getTextHeight() + 1f)) {
 				hoveringTextBox = tb;
 				break;
 			}
@@ -205,11 +206,13 @@ public class Tool_Text extends Tool {
 					xSelPos[0] = xSelPos[1];
 					ySelPos[0] = ySelPos[1];
 					selSize[0] = selSize[1];
+					selCharRight[0] = selCharRight[1];
 				} else if (selChar[1] == null) {
 					selChar[1] = selChar[0];
 					xSelPos[1] = xSelPos[0];
 					ySelPos[1] = ySelPos[0];
 					selSize[1] = selSize[0];
+					selCharRight[1] = selCharRight[0];
 				}
 				
 				
@@ -249,19 +252,83 @@ public class Tool_Text extends Tool {
 	
 	private void typeKey(KeyEvent event) {
 		if (selectedTextBox != null && (selChar[0] != null || selChar[1] != null)) {
-			int index = selectedTextBox.getStringRealIndex(selChar[0]);
-			
-			String txt = selectedTextBox.text;
-			
-			if (selCharRight[0]) {
-				txt = txt.substring(0, index + 1) + event.getCharacter() + txt.substring(index + 1);
-			} else {
-				txt = txt.substring(0, index) + event.getCharacter() + txt.substring(index);
+			if (selChar[0] != null && selChar[1] != null) {
+				if (selChar[1] < selChar[0] || selChar[1] == selChar[0] && !selCharRight[1] && selCharRight[0]) {
+					int ph1 = selChar[0];
+					selChar[0] = selChar[1];
+					selChar[1] = ph1;
+					
+					boolean ph2 = selCharRight[0];
+					selCharRight[0] = selCharRight[1];
+					selCharRight[1] = ph2;
+				}
+				
+				if (!selChar[0].equals(selChar[1]) || selCharRight[0] != selCharRight[1]) {
+					int start = (selCharRight[0] ? (selChar[0] + 1) : selChar[0]);
+					int end = (selCharRight[1] ? selChar[1] : (selChar[1] - 1));
+					
+					start = selectedTextBox.getStringRealIndex(start);
+					end = selectedTextBox.getStringRealIndex(end);
+					
+					selectedTextBox.text = selectedTextBox.text.substring(0, start) + selectedTextBox.text.substring(end + 1);
+				}
 			}
 			
-			selectedTextBox.text = txt;
-			selChar[0]++;
+			
+			if (selectedTextBox.text.length() == 0) {
+				for (int i = viewport.textboxList.size(); i >= 0; i--) {
+					if (viewport.textboxList.get(i) == selectedTextBox) {
+						viewport.textboxList.remove(i);
+						break;
+					}
+				}
+				
+				selectedTextBox = null;
+				return;
+			}
+			
+			
+			int index = selectedTextBox.getStringRealIndex(selChar[0]);
+			String txt = selectedTextBox.text;
+
 			selChar[1] = null;
+			
+			if (event.getCode() == KeyCode.ENTER) {
+				selectedTextBox.text = txt.substring(0, index + (selCharRight[0] ? 1 : 0)) + "\n" + txt.substring(index + (selCharRight[0] ? 1 : 0));
+				
+				selChar[0]++;
+			} else if (event.getCode() == KeyCode.BACK_SPACE) {
+				if (selChar[0] > 0) {
+					int rm = (selCharRight[0] ? index : (index - 1));
+					
+					selectedTextBox.removeCharAt(rm);
+					
+					selChar[0]--;
+				} else if (selCharRight[0]) {
+					selectedTextBox.removeCharAt(0);
+					
+					selCharRight[0] = false;
+				}
+				
+				if (selectedTextBox.text.length() == 0) {
+					for (int i = viewport.textboxList.size(); i >= 0; i--) {
+						if (viewport.textboxList.get(i) == selectedTextBox) {
+							viewport.textboxList.remove(i);
+							break;
+						}
+					}
+					
+					selectedTextBox = null;
+					return;
+				}
+			} else {
+				txt = txt.substring(0, index + (selCharRight[0] ? 1 : 0)) + event.getText() + txt.substring(index + (selCharRight[0] ? 1 : 0));
+				
+				selectedTextBox.text = txt;
+				
+				selChar[0]++;
+			}
+			
 			
 			viewport.draw();
 		}

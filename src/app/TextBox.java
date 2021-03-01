@@ -129,7 +129,7 @@ public class TextBox {
 		
 		int offset = 0;
 		
-		for (int i = 0; i < strIndex; i++) {
+		for (int i = 0; i <= strIndex; i++) {
 			while (strWithPattern.charAt(i + offset) != str.charAt(i)) {
 				offset++;
 			}
@@ -154,5 +154,26 @@ public class TextBox {
 	}
 	public String getUnpatternedString() {
 		return getUnpatternedString(text);
+	}
+	public void removeCharAt(int index) {
+		System.out.println("remove index " + index);
+		if (index >= 2 && text.indexOf("\\]", index - 2) == (index - 2)) {
+			System.out.println("pattern on left");
+			
+			int start = text.indexOf("[/");
+			
+			while (start != -1) {
+				if (text.indexOf("\\]", start) == (index - 2)) {
+					text = text.substring(0, start) + text.substring(index + 1);
+					break;
+				}
+				
+				start = text.indexOf("[/", start + 1);
+			}
+			
+			return;
+		}
+		
+		text = text.substring(0, index) + text.substring(index + 1);
 	}
 }

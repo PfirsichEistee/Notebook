@@ -75,6 +75,7 @@ public class GUI_Controller {
     	mainPane.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
+				viewport.requestFocus();
 				viewport.onMousePressed(getMouseButtonID(event), (float)event.getX(), (float)event.getY());
 			}
     	});

@@ -72,7 +72,7 @@ public class Viewport extends Canvas {
 		
 		
 		// TESTING
-		textboxList.add(new TextBox("This is some sort [/f\\]of test[/n\\] haha\nIs\nA\nTest", 1, 1, 10, 0.5f));
+		textboxList.add(new TextBox("I dont know\nThis is some sort [/f\\]of test[/n\\] haha\nIs\nA\nTest", 1, 1, 10, 0.5f));
 	}
 	
 	
