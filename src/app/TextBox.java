@@ -7,6 +7,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class TextBox {
+	// ATTRIBUTES //
+	
 	public String text;
 	public float x, y;
 	public float width;
@@ -25,6 +27,8 @@ public class TextBox {
 	 */
 	
 	
+	// CONSTRUCTOR //
+	
 	public TextBox(String pText, float px, float py, float pWidth, float pFontHeight) {
 		text = pText;
 		x = px;
@@ -33,6 +37,8 @@ public class TextBox {
 		fontHeight = pFontHeight;
 	}
 	
+	
+	// -> "Main"-Methods
 	
 	public void draw(GraphicsContext gc, float pixelPerCm) {
 		gc.setStroke(Color.BLACK);
@@ -43,7 +49,7 @@ public class TextBox {
 		String rowStr = getTextRow(row);
 		
 		while (rowStr != null) {
-			drawRow(gc, rowStr, (float)(x * pixelPerCm), (float)(y * pixelPerCm + gc.getFont().getSize() * row));
+			drawRow(gc, rowStr, (float)(x * pixelPerCm), (float)(y * pixelPerCm + gc.getFont().getSize() * row), pixelPerCm);
 			
 			row++;
 			rowStr = getTextRow(row);
@@ -55,7 +61,7 @@ public class TextBox {
 	}
 	
 	
-	private void drawRow(GraphicsContext gc, String str, float px, float py) {
+	private void drawRow(GraphicsContext gc, String str, float px, float py, float pixelPerCm) {
 		int patternStart = str.indexOf("[/");
 		String ph = str;
 		if (patternStart != -1) {
@@ -79,28 +85,92 @@ public class TextBox {
 					fat = false;
 				}
 				
-				drawRow(gc, str.substring(patternEnd + 2), px + getStringWidth(ph, gc.getFont()), py);
+				drawRow(gc, str.substring(patternEnd + 2), px + getStringWidth(ph) * pixelPerCm, py, pixelPerCm);
 			}
 		}
 	}
 	
 	
 	
-	private float getStringWidth(String str, Font font) {
+	// -> Patterned Strings
+	
+	// -> -> public
+	public String getCharAt(String str, int index) {
+		int offset = 0;
+		
+		int start = -1;
+		int end = -1;
+		
+		do {
+			start = str.indexOf("[/", start + 1);
+			end = str.indexOf("\\]", end + 1) + 1;
+			
+			if (start != -1 && (index + offset) > start) {
+				offset += (end - start);
+			} else if ((index + offset) == start) {
+				return str.substring(start, end + 1);
+			}
+		} while (start != -1);
+		
+		return str.substring(index + offset, index + offset + 1);
+	}
+	public String getCharAt(int index) {
+		return getCharAt(text, index);
+	}
+	
+	
+	public int getStringLength(String str) {
+		int offset = 0;
+		
+		int start = -1;
+		int end = -1;
+		
+		do {
+			start = str.indexOf("[/", start + 1);
+			end = str.indexOf("\\]", end + 1) + 1;
+			
+			if (start != -1) {
+				offset += (end - start);
+			}
+		} while (start != -1);
+		
+		return (str.length() - offset);
+	}
+	
+	
+	public float getStringWidth(String str, int startIndex, int endIndex) { // endIndex excluded
+		str = getUnpatternedString(str);
+		if (endIndex < str.length()) {
+			str = str.substring(startIndex, endIndex);
+		} else {
+			str = str.substring(startIndex);
+		}
+		
+		
 		Text txt = new Text(str);
-		txt.setFont(font);
+		txt.setFont(Font.font(fontHeight));
 		
 		return (float)txt.getLayoutBounds().getWidth();
+	}
+	public float getStringWidth(String str) {
+		return getStringWidth(str, 0, 999999999);
 	}
 	
 	
 	public float getTextWidth() {
-		Text txt = new Text(getUnpatternedString(text));
-		txt.setFont(Font.font(fontHeight));
-		
-		return (float)txt.getLayoutBounds().getWidth(); // width in cm!
+		return getStringWidth(text, 0, 999999999);
 	}
 	public float getTextHeight() {
+		return getTextRowCount() * fontHeight;
+	}
+	
+
+	public String getTextRow(int pRow) {
+		return CMath.getStringRow(text, pRow);
+	}
+	
+	
+	public int getTextRowCount() {
 		int rows = 1;
 		
 		int ph = 0;
@@ -109,53 +179,30 @@ public class TextBox {
 			rows++;
 		}
 		
-		return rows * fontHeight;
+		return rows;
 	}
-	public String getTextRow(int pRow) {
-		return CMath.getStringRow(text, pRow);
-	}
-	public float getStringWidth(String str) {
-		// ..in cm
-		
-		Text txt = new Text(getUnpatternedString(str));
-		txt.setFont(Font.font(fontHeight));
-		
-		return (float)txt.getLayoutBounds().getWidth();
-	}
-	public int getStringRealIndex(String strWithPattern, int strIndex) {
-		// strIndex is the index of getStringWithoutPattern(strWithPattern)
-		
-		String str = getUnpatternedString(strWithPattern);
-		
-		int offset = 0;
-		
-		for (int i = 0; i <= strIndex; i++) {
-			while (strWithPattern.charAt(i + offset) != str.charAt(i)) {
-				offset++;
-			}
-		}
-		
-		return (strIndex + offset);
-	}
-	public int getStringRealIndex(int strIndex) {
-		return getStringRealIndex(text, strIndex);
-	}
+	
+	
 	public String getUnpatternedString(String ph) {
 		int phIndex = 0;
 		while (phIndex != -1) {
 			phIndex = ph.indexOf("[/");
+			int phIndexEnd = ph.indexOf("\\]");
 			
-			if (phIndex != -1 && ph.indexOf("\\]") != -1) {
-				ph = ph.substring(0, phIndex) + ph.substring(ph.indexOf("\\]") + 2);
+			if (phIndex != -1 && phIndexEnd != -1) {
+				ph = ph.substring(0, phIndex) + "\u0000" + ph.substring(phIndexEnd + 2); // \u0000 is an empty character
 			}
 		}
 		
 		return ph;
 	}
-	public String getUnpatternedString() {
-		return getUnpatternedString(text);
-	}
-	public void removeCharAt(int index) {
+	
+	
+	
+	
+	// TRASH
+	
+	/*public void removeCharAt(int index) {
 		System.out.println("remove index " + index);
 		if (index >= 2 && text.indexOf("\\]", index - 2) == (index - 2)) {
 			System.out.println("pattern on left");
@@ -175,5 +222,5 @@ public class TextBox {
 		}
 		
 		text = text.substring(0, index) + text.substring(index + 1);
-	}
+	}*/
 }

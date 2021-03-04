@@ -94,8 +94,15 @@ public class GUI_Controller {
     	
     	// Mouse Drag
     	mainPane.setOnMouseDragged(new EventHandler<MouseEvent>() {
+    		long lastHandle = System.currentTimeMillis();
 			@Override
 			public void handle(MouseEvent event) {
+				long delta = System.currentTimeMillis() - lastHandle;
+				if (delta < 20) {
+					return;
+				}
+				lastHandle = System.currentTimeMillis();
+				
 				viewport.onMouseDragged(getMouseButtonID(event), (float)event.getX(), (float)event.getY());
 			}
     	});
